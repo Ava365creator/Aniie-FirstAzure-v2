@@ -32,13 +32,13 @@ jobs:
 
       - name: Prepare Azure deployment package
         run: |
-          # Create deployment directory with correct structure
+          # Create deployment directory
           mkdir -p deployment
           
           # 1. Copy standalone files to root
           cp -r .next/standalone/* deployment/
           
-          # 2. Ensure node_modules is properly copied (not a symlink)
+          # 2. Ensure node_modules is properly copied
           rm -rf deployment/node_modules 2>/dev/null || true
           cp -r .next/standalone/node_modules deployment/
           
@@ -49,33 +49,21 @@ jobs:
           # 4. Copy public folder
           cp -r public deployment/ 2>/dev/null || true
           
-          # 5. Create CRITICAL startup.sh for Azure
+          # 5. Create startup.sh for Azure
           cat > deployment/startup.sh << 'EOF'
           #!/bin/bash
           cd /home/site/wwwroot
-          
-          # Force port 8080 (Azure's default for Node.js)
           export PORT=8080
           export HOST=0.0.0.0
           export NODE_ENV=production
-          
-          echo "Starting Next.js on Azure App Service"
-          echo "Port: \$PORT | Time: \$(date)"
-          
-          # Start the server
+          echo "Starting Next.js on Azure - $(date)"
           exec node server.js
           EOF
           chmod +x deployment/startup.sh
           
-          # 6. Create .deployment file to tell Azure to use our startup.sh
-          cat > deployment/.deployment << 'EOF'
-          [config]
-          command = ./startup.sh
-          EOF
-          
-          echo "✅ Deployment package prepared"
+          echo "Deployment package ready"
 
-      - name: Upload artifact for deployment
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: azure-deployment
@@ -85,9 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment: Production
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - name: Download artifact
@@ -95,15 +80,10 @@ jobs:
         with:
           name: azure-deployment
 
-      - name: List files for debugging
-        run: ls -la
-
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9796A8335D934966A5E913FDA9E8AFA3 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_13A8ED7A7AAC45DFB47F56FD9C4B8C71 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_59A64EB54C694F91896FCC5837582130 }}
+          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
