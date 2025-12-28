@@ -38,7 +38,7 @@ jobs:
           # 1. Copy standalone files to root
           cp -r .next/standalone/* deployment/
           
-          # 2. Ensure node_modules is properly copied
+          # 2. Ensure node_modules is properly copied (not a symlink)
           rm -rf deployment/node_modules 2>/dev/null || true
           cp -r .next/standalone/node_modules deployment/
           
@@ -49,21 +49,33 @@ jobs:
           # 4. Copy public folder
           cp -r public deployment/ 2>/dev/null || true
           
-          # 5. Create startup.sh for Azure
+          # 5. Create CRITICAL startup.sh for Azure
           cat > deployment/startup.sh << 'EOF'
           #!/bin/bash
           cd /home/site/wwwroot
+          
+          # Force port 8080 (Azure's default for Node.js)
           export PORT=8080
           export HOST=0.0.0.0
           export NODE_ENV=production
-          echo "Starting Next.js on Azure - $(date)"
+          
+          echo "Starting Next.js on Azure App Service"
+          echo "Port: $PORT | Time: $(date)"
+          
+          # Start the server
           exec node server.js
           EOF
           chmod +x deployment/startup.sh
           
-          echo "Deployment package ready"
+          # 6. Create .deployment file to tell Azure to use our startup.sh
+          cat > deployment/.deployment << 'EOF'
+          [config]
+          command = ./startup.sh
+          EOF
+          
+          echo "✅ Deployment package prepared"
 
-      - name: Upload artifact
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: azure-deployment
@@ -80,10 +92,13 @@ jobs:
         with:
           name: azure-deployment
 
+      - name: List files for debugging
+        run: ls -la
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
