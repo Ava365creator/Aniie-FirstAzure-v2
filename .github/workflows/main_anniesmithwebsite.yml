@@ -66,3 +66,4 @@ jobs:
           app-name: 'AnnieSmithWebsite'
           slot-name: 'Production'
           package: .
+          startup-command: 'PORT=8080 node server.js'  # ADD THIS LINE
