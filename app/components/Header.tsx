@@ -17,6 +17,45 @@ export default function Header() {
     { label: 'Contact', href: '/contact' },
   ]
 
+  // CRITICAL FIX: Make sure we're returning JSX, not null/undefined
+  const renderLoggedInUser = () => {
+    if (!isLoggedIn) return null
+    
+    return (
+      <div className="relative">
+        <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg">
+          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+            <FaUser className="w-4 h-4 text-primary-600" />
+          </div>
+          <span className="text-sm font-medium text-gray-700 hidden md:inline">
+            John Doe
+          </span>
+        </button>
+      </div>
+    )
+  }
+
+  const renderLoggedOutButtons = () => {
+    if (isLoggedIn) return null
+    
+    return (
+      <div className="flex items-center space-x-2">
+        <a
+          href="/login"
+          className="btn-secondary py-2 px-4 text-sm"
+        >
+          Login
+        </a>
+        <a
+          href="/register"
+          className="btn-primary py-2 px-4 text-sm"
+        >
+          Register
+        </a>
+      </div>
+    )
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
       <div className="container-custom">
@@ -37,7 +76,7 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
+            {Array.isArray(navItems) && navItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
@@ -51,47 +90,25 @@ export default function Header() {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             {/* Search Icon */}
-            <button className="p-2 text-gray-600 hover:text-primary-600">
+            <button 
+              className="p-2 text-gray-600 hover:text-primary-600"
+              onClick={() => console.log('Search clicked')}
+            >
               <FaSearch className="w-5 h-5" />
             </button>
 
             {/* Notifications */}
-            <button className="p-2 text-gray-600 hover:text-primary-600 relative">
+            <button 
+              className="p-2 text-gray-600 hover:text-primary-600 relative"
+              onClick={() => console.log('Notifications clicked')}
+            >
               <FaBell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
-            {/* User Login */}
+            {/* User Login - IMPORTANT FIX */}
             <div className="flex items-center space-x-2">
-              {isLoggedIn ? (
-                <>
-                  <div className="relative">
-                    <button className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg">
-                      <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                        <FaUser className="w-4 h-4 text-primary-600" />
-                      </div>
-                      <span className="text-sm font-medium text-gray-700 hidden md:inline">
-                        John Doe
-                      </span>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <a
-                    href="/login"
-                    className="btn-secondary py-2 px-4 text-sm"
-                  >
-                    Login
-                  </a>
-                  <a
-                    href="/register"
-                    className="btn-primary py-2 px-4 text-sm"
-                  >
-                    Register
-                  </a>
-                </div>
-              )}
+              {isLoggedIn ? renderLoggedInUser() : renderLoggedOutButtons()}
             </div>
 
             {/* Mobile menu button */}
@@ -112,7 +129,7 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="flex flex-col space-y-3">
-              {navItems.map((item) => (
+              {Array.isArray(navItems) && navItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
