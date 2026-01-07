@@ -1,1 +1,18 @@
-
+// app/isolation-test/page.tsx
+export default function IsolationTest() {
+  return (
+    <html>
+      <head>
+        <title>Isolation Test</title>
+      </head>
+      <body style={{ margin: 0, padding: '40px', fontFamily: 'Arial' }}>
+        <div style={{ border: '3px solid green', padding: '20px' }}>
+          <h1 style={{ color: 'green' }}>✅ ISOLATION TEST WORKING</h1>
+          <p>This page has NO imports, NO components, NO dependencies</p>
+          <p>If this loads, the issue is in shared components or config</p>
+          <p>Test time: {new Date().toLocaleTimeString()}</p>
+        </div>
+      </body>
+    </html>
+  );
+}
