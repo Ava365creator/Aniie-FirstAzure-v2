@@ -1,4 +1,8 @@
 export default function Footer() {
+  // Ensure all arrays exist before mapping
+  const candidateItems = ['Browse Jobs', 'Career Advice', 'Resume Builder', 'Job Alerts']
+  const employerItems = ['Post a Job', 'Browse Candidates', 'Employer Branding', 'HR Solutions']
+  
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container-custom py-12">
@@ -20,7 +24,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">For Candidates</h3>
             <ul className="space-y-2">
-              {['Browse Jobs', 'Career Advice', 'Resume Builder', 'Job Alerts'].map((item) => (
+              {Array.isArray(candidateItems) && candidateItems.map((item) => (
                 <li key={item}>
                   <a href="#" className="text-gray-400 hover:text-white text-sm">
                     {item}
@@ -33,7 +37,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">For Employers</h3>
             <ul className="space-y-2">
-              {['Post a Job', 'Browse Candidates', 'Employer Branding', 'HR Solutions'].map((item) => (
+              {Array.isArray(employerItems) && employerItems.map((item) => (
                 <li key={item}>
                   <a href="#" className="text-gray-400 hover:text-white text-sm">
                     {item}
